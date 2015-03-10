@@ -94,8 +94,10 @@ class Camera {
     forward: Vector;
     right: Vector;
     up: Vector;
+    pos: Vector;
 
-    constructor(public pos: Vector, lookAt: Vector) {
+    constructor(pos: Vector, lookAt: Vector) {
+        this.pos = pos;
         var down = new_vector(0.0, -1.0, 0.0);
         this.forward = vec_norm(vec_minus(lookAt, this.pos));
         this.right = vec_times(1.5, vec_norm(vec_cross(this.forward, down)));
@@ -256,7 +258,7 @@ class RayTracer {
         }
     }
 
-    private shade(isect: Intersection, scene: Scene, depth: number) {
+    private shade(isect: Intersection, scene: Scene, depth: number): Color{
         var d = isect.ray.dir;
         var pos = vec_plus(vec_times(isect.dist, d), isect.ray.start);
         var normal = isect.thing.normal(pos);
@@ -267,12 +269,12 @@ class RayTracer {
         return color_plus(naturalColor, reflectedColor);
     }
 
-    private getReflectionColor(thing: Thing, pos: Vector, normal: Vector, rd: Vector, scene: Scene, depth: number) {
+    private getReflectionColor(thing: Thing, pos: Vector, normal: Vector, rd: Vector, scene: Scene, depth: number): Color {
         return color_scale(thing.surface.reflect(pos), this.traceRay({ start: pos, dir: rd }, scene, depth + 1));
     }
 
-    private getNaturalColor(thing: Thing, pos: Vector, norm: Vector, rd: Vector, scene: Scene) {
-        var addLight = (col, light) => {
+    private getNaturalColor(thing: Thing, pos: Vector, norm: Vector, rd: Vector, scene: Scene): Color {
+        var addLight = (col: Color, light: Light) => {
             var ldis = vec_minus(
                 light.pos, 
                 pos);
@@ -295,17 +297,20 @@ class RayTracer {
         return scene.lights.reduce(addLight, color_defaultColor);
     }
 
-    render(scene, ctx, screenWidth, screenHeight) {
+    render(scene:Scene, ctx, screenWidth, screenHeight) {
         var start = new Date().getTime();
 
-        var getPoint = (x, y, camera) => {
+        var getPoint = (x, y, camera: Camera): Vector => {
             var recenterX = x => (x - (screenWidth / 2.0)) / 2.0 / screenWidth;
             var recenterY = y => -(y - (screenHeight / 2.0)) / 2.0 / screenHeight;
-            return vec_norm(vec_plus(camera.forward, vec_plus(vec_times(recenterX(x), camera.right), vec_times(recenterY(y), camera.up))));
+            return vec_norm(vec_plus(camera.forward, 
+                vec_plus(vec_times(recenterX(x), camera.right), 
+                vec_times(recenterY(y), camera.up))));
         }
         for (var y = 0; y < screenHeight; y++) {
             for (var x = 0; x < screenWidth; x++) {
-                var color = this.traceRay({ start: scene.camera.pos, dir: getPoint(x, y, scene.camera) }, scene, 0);
+                var color = this.traceRay({ start: scene.camera.pos, dir: getPoint(x, y, scene.camera) },
+                    scene, 0);
                 var c = color_toDrawingColor(color);
                 ctx.fillStyle = "rgb(" + String(c.r) + ", " + String(c.g) + ", " + String(c.b) + ")";
                 ctx.fillRect(x, y, x + 1, y + 1);
