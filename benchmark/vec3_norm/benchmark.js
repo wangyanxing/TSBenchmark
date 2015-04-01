@@ -20,7 +20,7 @@ Vector.prototype.normalize = function () {
 
 var start = new Date().getTime();
 
-for(var i = 0; i < 1000000; ++i) {
+for(var i = 0; i < 100000000; ++i) {
     var v = new Vector();
     v.x = i;
     v.y = i/2.0;
