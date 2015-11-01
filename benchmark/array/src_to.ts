@@ -5,7 +5,7 @@ struct Pt {
 
 var start = new Date().getTime();
 
-for (var i = 0; i < 300000; ++i) {
+for (var i = 0; i < 30000; ++i) {
     var arr: Pt[] = new Pt[100];
     arr[0].x = 10;
 }

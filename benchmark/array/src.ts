@@ -5,7 +5,7 @@ class Pt {
 
 var start = new Date().getTime();
 
-for (var i = 0; i < 300000; ++i) {
+for (var i = 0; i < 30000; ++i) {
     var arr = new Array(100);
     for (var j = 0; j < 100; ++j) {
         arr[j] = new Pt();
